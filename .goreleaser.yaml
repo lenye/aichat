@@ -1,0 +1,73 @@
+project_name: aichat
+
+
+before:
+  hooks:
+    - go mod tidy
+
+
+builds:
+  - id: aichat
+    binary: aichat
+
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s -w
+      - -X github.com/lenye/aichat/pkg/version.AppName={{.ProjectName}}
+      - -X github.com/lenye/aichat/pkg/version.Version={{.Version}}
+      - -X github.com/lenye/aichat/pkg/version.BuildCommit={{.ShortCommit}}
+      - -X github.com/lenye/aichat/pkg/version.BuildTime={{.CommitDate}}
+    flags:
+      - -trimpath
+    goos:
+      - linux
+      - windows
+      - darwin
+      - freebsd
+    goarch:
+      - amd64
+      - arm64
+      - 386
+      - arm
+    goamd64:
+      - v2
+    goarm:
+      - 7
+      - 6
+    ignore:
+      - goos: windows
+        goarch: arm
+      - goos: darwin
+        goarch: 386
+      - goos: darwin
+        goarch: arm
+    mod_timestamp: '{{ .CommitTimestamp }}'
+
+
+archives:
+  - id: aichat
+    name_template: '{{ .ProjectName }}_v{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+    format: tar.gz
+    format_overrides:
+      - goos: windows
+        format: zip
+
+    files:
+      - LICENSE
+      - README.md
+
+
+checksum:
+  name_template: "{{ .ProjectName }}_v{{ .Version }}_checksums.txt"
+
+
+changelog:
+  filters:
+    exclude:
+      - '^wip:'
+      - '^docs:'
+      - '^test:'
+      - '^style:'
+      - '^chore:'
+      - '^ci:'
