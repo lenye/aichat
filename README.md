@@ -1,3 +1,3 @@
 # aichat
 
-和 ai 机器人聊天
+人工智能聊天，chatGPT

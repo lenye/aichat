@@ -12,15 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package chatgpt
+package ai
 
 import (
 	"bufio"
 	"context"
+	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 
 	"github.com/sashabaranov/go-openai"
 )
@@ -66,7 +69,7 @@ func BuildClient(apiKey, apiType, baseURL, proxy string) (*openai.Client, error)
 
 func Chat(client *openai.Client, user, model, prompt string, stream bool) {
 	ctx := context.Background()
-	req := openai.ChatCompletionRequest{
+	req := &openai.ChatCompletionRequest{
 		Temperature:      0.7,
 		TopP:             1,
 		N:                1,
@@ -93,22 +96,65 @@ func Chat(client *openai.Client, user, model, prompt string, stream bool) {
 	// 用户输入
 	s := bufio.NewScanner(os.Stdin)
 	for s.Scan() {
-		// 用户输入的提示语
-		req.Messages = append(req.Messages, openai.ChatCompletionMessage{
-			Role:    openai.ChatMessageRoleUser,
-			Content: s.Text(),
-		})
+		input := s.Text()
+		if strings.TrimSpace(input) != "" {
+			// 用户输入的提示语
+			req.Messages = append(req.Messages, openai.ChatCompletionMessage{
+				Role:    openai.ChatMessageRoleUser,
+				Content: s.Text(),
+			})
 
-		resp, err := client.CreateChatCompletion(ctx, req)
-		if err != nil {
-			fmt.Printf("ChatCompletion error: %v\n", err)
-			continue
+			if msg := chatCompletion(ctx, client, req, stream); msg != nil {
+				req.Messages = append(req.Messages, *msg)
+			}
 		}
-
-		// ai 回复
-		fmt.Printf("%s\n\n", resp.Choices[0].Message.Content)
-		req.Messages = append(req.Messages, resp.Choices[0].Message)
-
 		fmt.Print("> ")
 	}
+}
+
+func chatCompletion(ctx context.Context,
+	client *openai.Client,
+	req *openai.ChatCompletionRequest,
+	stream bool) *openai.ChatCompletionMessage {
+	if stream {
+		chatStream, err := client.CreateChatCompletionStream(ctx, *req)
+		if err != nil {
+			fmt.Printf("ChatCompletionStream error: %v\n", err)
+			return nil
+		}
+		defer chatStream.Close()
+
+		var sb strings.Builder
+		for {
+			response, err := chatStream.Recv()
+			if err != nil {
+				// Stream finished
+				if errors.Is(err, io.EOF) {
+					fmt.Print("\n\n")
+					return &openai.ChatCompletionMessage{
+						Role:    openai.ChatMessageRoleAssistant,
+						Content: sb.String(),
+					}
+				} else {
+					fmt.Printf("Stream error: %v\n", err)
+					return nil
+				}
+			}
+
+			// fmt.Printf("Stream response: %v\n", response)
+
+			sb.WriteString(response.Choices[0].Delta.Content)
+			fmt.Printf("%s", response.Choices[0].Delta.Content)
+		}
+	}
+
+	resp, err := client.CreateChatCompletion(ctx, *req)
+	if err != nil {
+		fmt.Printf("ChatCompletion error: %v\n", err)
+		return nil
+	}
+	// ai 回复
+	fmt.Printf("%s\n\n", resp.Choices[0].Message.Content)
+
+	return &resp.Choices[0].Message
 }

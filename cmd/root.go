@@ -20,47 +20,51 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/lenye/aichat/pkg/chatgpt"
+	"github.com/lenye/aichat/pkg/ai"
 	"github.com/lenye/aichat/pkg/version"
 )
 
 var rootCmd = &cobra.Command{
 	Use:   "aichat",
 	Short: "ai chat",
+	Long: `ai chat, chatGPT
+    Open source: https://github.com/lenye/aichat`,
 	CompletionOptions: cobra.CompletionOptions{
 		HiddenDefaultCmd: true,
 	},
 	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		cli, err := chatgpt.BuildClient(ApiKey, ApiType, BaseUrl, Proxy)
+		cli, err := ai.BuildClient(apiKey, apiType, baseUrl, proxy)
 		if err != nil {
 			_, _ = fmt.Fprintln(os.Stderr, err)
 			return
 		}
 		if len(args) == 1 {
-			Prompt = args[0]
+			prompt = args[0]
 		}
-		chatgpt.Chat(cli, "", Model, Prompt, Stream)
+		ai.Chat(cli, "", model, prompt, stream)
 	},
 }
 
 var (
-	ApiType string
-	ApiKey  string
-	BaseUrl string
-	Proxy   string
-	Model   string
-	Prompt  string // 系统提示语
-	Stream  bool
+	apiKey  string
+	apiType string
+	baseUrl string
+	proxy   string
+
+	model  string
+	stream bool
+	prompt string // 系统提示语
 )
 
 const (
-	apiType = "api_type" // api 类型
-	apiKey  = "api_key"  // secret key
-	baseUrl = "base_url" // base url
-	proxy   = "proxy"    // 代理
-	model   = "model"    // model
-	stream  = "stream"   // stream
+	flagApiKey  = "api_key"  // secret key
+	flagApiType = "api_type" // api 类型
+	flagBaseUrl = "base_url" // api base url
+	flagProxy   = "proxy"    // 代理
+
+	flagModel  = "model"  // model
+	flagStream = "stream" // stream
 )
 
 func Execute() {
@@ -74,12 +78,12 @@ func init() {
 	rootCmd.SetVersionTemplate(`{{printf "%s" .Version}}`)
 	rootCmd.Version = version.Print()
 
-	rootCmd.Flags().StringVarP(&ApiKey, apiKey, "k", "", "secret key (required)")
-	_ = rootCmd.MarkFlagRequired(apiKey)
+	rootCmd.Flags().StringVarP(&apiKey, flagApiKey, "k", "", "secret key (required)")
+	_ = rootCmd.MarkFlagRequired(flagApiKey)
 
-	rootCmd.Flags().StringVarP(&ApiType, apiType, "t", "OPEN_AI", "api type")
-	rootCmd.Flags().StringVarP(&BaseUrl, baseUrl, "u", "https://api.openai.com/v1", "base url")
-	rootCmd.Flags().StringVar(&Proxy, proxy, "", "proxy")
-	rootCmd.Flags().StringVar(&Model, model, "gpt-3.5-turbo", "model")
-	rootCmd.Flags().BoolVar(&Stream, stream, false, "is stream")
+	rootCmd.Flags().StringVarP(&apiType, flagApiType, "t", "OPEN_AI", "api type")
+	rootCmd.Flags().StringVarP(&baseUrl, flagBaseUrl, "u", "https://api.openai.com/v1", "api base url")
+	rootCmd.Flags().StringVar(&proxy, flagProxy, "", "proxy")
+	rootCmd.Flags().StringVar(&model, flagModel, "gpt-3.5-turbo", "model")
+	rootCmd.Flags().BoolVar(&stream, flagStream, false, "is stream")
 }

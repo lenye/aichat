@@ -3,7 +3,7 @@ module github.com/lenye/aichat
 go 1.20
 
 require (
-	github.com/sashabaranov/go-openai v1.9.5
+	github.com/sashabaranov/go-openai v1.10.0
 	github.com/spf13/cobra v1.7.0
 )
 
