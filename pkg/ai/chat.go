@@ -126,7 +126,7 @@ func chatCompletion(ctx context.Context,
 
 		var sb strings.Builder
 		for {
-			response, err := chatStream.Recv()
+			resp, err := chatStream.Recv()
 			if err != nil {
 				// Stream finished
 				if errors.Is(err, io.EOF) {
@@ -136,15 +136,20 @@ func chatCompletion(ctx context.Context,
 						Content: sb.String(),
 					}
 				} else {
-					fmt.Printf("Stream error: %v\n", err)
+					fmt.Printf("stream error: %v\n", err)
 					return nil
 				}
 			}
 
-			// fmt.Printf("Stream response: %v\n", response)
+			// fmt.Printf("Stream resp: %v\n", resp)
 
-			sb.WriteString(response.Choices[0].Delta.Content)
-			fmt.Printf("%s", response.Choices[0].Delta.Content)
+			// // Stream FinishReason
+			// if resp.Choices[0].FinishReason != "" {
+			// 	fmt.Printf("stream finish reason: %s", resp.Choices[0].FinishReason)
+			// }
+
+			sb.WriteString(resp.Choices[0].Delta.Content)
+			fmt.Printf("%s", resp.Choices[0].Delta.Content)
 		}
 	}
 
