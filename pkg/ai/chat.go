@@ -101,7 +101,7 @@ func Chat(client *openai.Client, user, model, prompt string, stream bool) {
 			// 用户输入的提示语
 			req.Messages = append(req.Messages, openai.ChatCompletionMessage{
 				Role:    openai.ChatMessageRoleUser,
-				Content: s.Text(),
+				Content: input,
 			})
 
 			if msg := chatCompletion(ctx, client, req, stream); msg != nil {
