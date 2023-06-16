@@ -24,9 +24,19 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/sashabaranov/go-openai"
 )
+
+const (
+	Timeout = 180 * time.Second
+)
+
+var defaultHTTPClient = &http.Client{
+	Timeout:   Timeout,
+	Transport: http.DefaultTransport,
+}
 
 // BuildClient 客户端
 func BuildClient(apiKey, apiType, baseURL, proxy string) (*openai.Client, error) {
@@ -51,23 +61,20 @@ func BuildClient(apiKey, apiType, baseURL, proxy string) (*openai.Client, error)
 		return nil, ErrInvalidAPIType
 	}
 
+	cfg.HTTPClient = defaultHTTPClient
+
 	if proxy != "" {
 		proxyUrl, err := url.Parse(proxy)
 		if err != nil {
 			return nil, ErrInvalidProxy
 		}
-		transport := &http.Transport{
-			Proxy: http.ProxyURL(proxyUrl),
-		}
-		cfg.HTTPClient = &http.Client{
-			Transport: transport,
-		}
+		cfg.HTTPClient.Transport.(*http.Transport).Proxy = http.ProxyURL(proxyUrl)
 	}
 
 	return openai.NewClientWithConfig(cfg), nil
 }
 
-func Chat(client *openai.Client, user, model, prompt string, stream bool) {
+func Chat(client *openai.Client, user, model, prompt string, maxTokens int, stream bool) {
 	ctx := context.Background()
 	req := &openai.ChatCompletionRequest{
 		Temperature:      0.7,
@@ -75,6 +82,7 @@ func Chat(client *openai.Client, user, model, prompt string, stream bool) {
 		N:                1,
 		PresencePenalty:  0,
 		FrequencyPenalty: 0,
+		MaxTokens:        maxTokens,
 		User:             user,
 		Model:            model,
 		Messages:         make([]openai.ChatCompletionMessage, 0),
@@ -148,8 +156,9 @@ func chatCompletion(ctx context.Context,
 			// 	fmt.Printf("stream finish reason: %s", resp.Choices[0].FinishReason)
 			// }
 
-			sb.WriteString(resp.Choices[0].Delta.Content)
-			fmt.Printf("%s", resp.Choices[0].Delta.Content)
+			msgContent := resp.Choices[0].Delta.Content
+			sb.WriteString(msgContent)
+			fmt.Printf("%s", msgContent)
 		}
 	}
 

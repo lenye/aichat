@@ -42,7 +42,7 @@ var rootCmd = &cobra.Command{
 		if len(args) == 1 {
 			prompt = args[0]
 		}
-		ai.Chat(cli, "", model, prompt, stream)
+		ai.Chat(cli, user, model, prompt, int(maxTokens), stream)
 	},
 }
 
@@ -52,19 +52,23 @@ var (
 	baseUrl string
 	proxy   string
 
-	model  string
-	stream bool
-	prompt string // 系统提示语
+	maxTokens uint
+	user      string
+	model     string
+	stream    bool
+	prompt    string // 系统提示语
 )
 
 const (
 	flagApiKey  = "api_key"  // secret key
 	flagApiType = "api_type" // api 类型
 	flagBaseUrl = "base_url" // api base url
-	flagProxy   = "proxy"    // 代理
+	flagProxy   = "proxy"    // proxy
 
-	flagModel  = "model"  // model
-	flagStream = "stream" // stream
+	flagMaxTokens = "max_tokens" // max_tokens
+	flagUser      = "user"       // user
+	flagModel     = "model"      // model
+	flagStream    = "stream"     // stream
 )
 
 func Execute() {
@@ -81,9 +85,12 @@ func init() {
 	rootCmd.Flags().StringVarP(&apiKey, flagApiKey, "k", "", "secret key (required)")
 	_ = rootCmd.MarkFlagRequired(flagApiKey)
 
-	rootCmd.Flags().StringVarP(&apiType, flagApiType, "t", "OPEN_AI", "api type")
+	rootCmd.Flags().StringVarP(&apiType, flagApiType, "t", "OPEN_AI", "api type: OPEN_AI, AZURE")
 	rootCmd.Flags().StringVarP(&baseUrl, flagBaseUrl, "u", "https://api.openai.com/v1", "api base url")
 	rootCmd.Flags().StringVar(&proxy, flagProxy, "", "proxy")
+
+	rootCmd.Flags().UintVarP(&maxTokens, flagMaxTokens, "m", 0, "max_tokens")
+	rootCmd.Flags().StringVar(&user, flagUser, "", "user")
 	rootCmd.Flags().StringVar(&model, flagModel, "gpt-3.5-turbo", "model")
 	rootCmd.Flags().BoolVar(&stream, flagStream, false, "is stream")
 }
