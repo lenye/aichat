@@ -74,7 +74,10 @@ func BuildClient(apiKey, apiType, baseURL, proxy string) (*openai.Client, error)
 	return openai.NewClientWithConfig(cfg), nil
 }
 
-func Chat(client *openai.Client, user, model, prompt string, maxTokens int, stream bool) {
+func Chat(client *openai.Client,
+	stream bool,
+	user, model, prompt string,
+	maxTokens, history int) {
 	ctx := context.Background()
 	req := &openai.ChatCompletionRequest{
 		Temperature:      0.7,
@@ -88,12 +91,16 @@ func Chat(client *openai.Client, user, model, prompt string, maxTokens int, stre
 		Messages:         make([]openai.ChatCompletionMessage, 0),
 	}
 
+	var (
+		sMsg  *openai.ChatCompletionMessage  // 系统提示语
+		hMsgs []openai.ChatCompletionMessage // 聊天记录
+	)
 	// 系统提示语
 	if prompt != "" {
-		req.Messages = append(req.Messages, openai.ChatCompletionMessage{
+		sMsg = &openai.ChatCompletionMessage{
 			Role:    openai.ChatMessageRoleSystem,
 			Content: prompt, // "you are a helpful chatbot"
-		})
+		}
 	}
 
 	// 会话
@@ -106,14 +113,30 @@ func Chat(client *openai.Client, user, model, prompt string, maxTokens int, stre
 	for s.Scan() {
 		input := s.Text()
 		if strings.TrimSpace(input) != "" {
+			var msgs []openai.ChatCompletionMessage
+			// 系统提示语
+			if sMsg != nil {
+				msgs = append(msgs, *sMsg)
+			}
+			// 聊天记录
+			if history > 0 {
+				if len(hMsgs)/2 > history {
+					hMsgs = hMsgs[2:]
+				}
+				msgs = append(msgs, hMsgs...)
+			}
 			// 用户输入的提示语
-			req.Messages = append(req.Messages, openai.ChatCompletionMessage{
+			uMsg := openai.ChatCompletionMessage{
 				Role:    openai.ChatMessageRoleUser,
 				Content: input,
-			})
+			}
+			msgs = append(msgs, uMsg)
+			req.Messages = msgs
 
 			if msg := chatCompletion(ctx, client, req, stream); msg != nil {
-				req.Messages = append(req.Messages, *msg)
+				// 保存聊天记录
+				hMsgs = append(hMsgs, uMsg)
+				hMsgs = append(hMsgs, *msg)
 			}
 		}
 		fmt.Print("> ")

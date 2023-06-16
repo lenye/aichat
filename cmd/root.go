@@ -42,7 +42,7 @@ var rootCmd = &cobra.Command{
 		if len(args) == 1 {
 			prompt = args[0]
 		}
-		ai.Chat(cli, user, model, prompt, int(maxTokens), stream)
+		ai.Chat(cli, stream, user, model, prompt, int(maxTokens), int(history))
 	},
 }
 
@@ -57,6 +57,7 @@ var (
 	model     string
 	stream    bool
 	prompt    string // 系统提示语
+	history   uint   // 聊天记录条数
 )
 
 const (
@@ -66,9 +67,10 @@ const (
 	flagProxy   = "proxy"    // proxy
 
 	flagMaxTokens = "max_tokens" // max_tokens
-	flagUser      = "user"       // user
+	flagUser      = "user"       // 用户标识
 	flagModel     = "model"      // model
 	flagStream    = "stream"     // stream
+	flagHistory   = "history"    // 聊天记录条数
 )
 
 func Execute() {
@@ -93,4 +95,5 @@ func init() {
 	rootCmd.Flags().StringVar(&user, flagUser, "", "user")
 	rootCmd.Flags().StringVar(&model, flagModel, "gpt-3.5-turbo", "model")
 	rootCmd.Flags().BoolVar(&stream, flagStream, false, "is stream")
+	rootCmd.Flags().UintVar(&history, flagHistory, 0, "chat history")
 }
