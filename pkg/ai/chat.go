@@ -88,7 +88,6 @@ func Chat(client *openai.Client,
 		MaxTokens:        maxTokens,
 		User:             user,
 		Model:            model,
-		Messages:         make([]openai.ChatCompletionMessage, 0),
 	}
 
 	var (
@@ -150,7 +149,7 @@ func chatCompletion(ctx context.Context,
 	if stream {
 		chatStream, err := client.CreateChatCompletionStream(ctx, *req)
 		if err != nil {
-			fmt.Printf("ChatCompletionStream error: %v\n", err)
+			fmt.Printf("CreateChatCompletionStream error: %v\n\n", err)
 			return nil
 		}
 		defer chatStream.Close()
@@ -167,7 +166,7 @@ func chatCompletion(ctx context.Context,
 						Content: sb.String(),
 					}
 				} else {
-					fmt.Printf("stream error: %v\n", err)
+					fmt.Printf("stream error: %v\n\n", err)
 					return nil
 				}
 			}
@@ -187,7 +186,7 @@ func chatCompletion(ctx context.Context,
 
 	resp, err := client.CreateChatCompletion(ctx, *req)
 	if err != nil {
-		fmt.Printf("ChatCompletion error: %v\n", err)
+		fmt.Printf("CreateChatCompletion error: %v\n\n", err)
 		return nil
 	}
 	// ai 回复
