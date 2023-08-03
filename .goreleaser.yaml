@@ -9,6 +9,7 @@ before:
 builds:
   - id: aichat
     binary: aichat
+    main: ./cmd/aichat
 
     env:
       - CGO_ENABLED=0
