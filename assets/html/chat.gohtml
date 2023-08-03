@@ -1,0 +1,25 @@
+{{define "chat.gohtml" -}}
+<!DOCTYPE html>
+<html lang="zh" dir="ltr">
+<head>
+    {{template "head.gohtml" .}}
+</head>
+<body>
+<section class="section">
+    <div class="columns is-centered">
+        <div class="column is-four-fifths">
+            <div hx-ext="sse" sse-connect="/chat/sse?stream={{.stream_id}}" class="box">
+                <div sse-swap="message" hx-swap="beforeend" class="content has-text-black"></div>
+            </div>
+            <div class="box">
+                <div id="sendmsg">
+                    {{template "chat_input.gohtml" .}}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{{template "footer.gohtml" .}}
+</body>
+</html>
+{{- end}}

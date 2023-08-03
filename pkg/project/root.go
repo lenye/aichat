@@ -12,34 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package version
+package project
 
 import (
-	"fmt"
+	"path/filepath"
 	"runtime"
 )
 
-var (
-	AppName     = "aichat"  // 名称
-	Version     = "dev"     // 版本
-	BuildCommit = "none"    // git commit
-	BuildTime   = "unknown" // 编译时间
+var _, self, _, _ = runtime.Caller(0)
 
-	OpenSource = "https://github.com/lenye/aichat" // 开发人
-)
-
-const versionTemplate = `%s
-  Version:     %s
-  Commit:      %s
-  Built:       %s
-  Go version:  %s
-  OS/Arch:     %s/%s
-  Open source: %s
-`
-
-func Print() string {
-	return fmt.Sprintf(versionTemplate,
-		AppName, Version, BuildCommit, BuildTime,
-		runtime.Version(), runtime.GOOS, runtime.GOARCH,
-		OpenSource)
+// Root returns the filepath to the root of this project.
+func Root(more ...string) string {
+	root := []string{filepath.Dir(self), "..", ".."}
+	root = append(root, more...)
+	return filepath.Join(root...)
 }

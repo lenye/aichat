@@ -1,0 +1,12 @@
+services:
+
+
+  aichat:
+    image: ghcr.io/lenye/aichat
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    command:
+      - --openai_apikey=xxx

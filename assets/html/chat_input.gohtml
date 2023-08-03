@@ -1,0 +1,18 @@
+{{define "chat_input.gohtml"}}
+    <form hx-post="/chat/msg" hx-target="#sendmsg" _="on htmx:beforeRequest set #submit @disabled to 'disabled'">
+        <input type="hidden" name="stream_id" value="{{.stream_id}}">
+        <input type="hidden" name="model" value="{{.model}}">
+        <input type="hidden" name="stream" value="{{.stream}}">
+        <input type="hidden" name="system" value="{{.system}}">
+        <input type="hidden" name="history" value="{{.history}}">
+        <input type="hidden" name="max_tokens" value="{{.max_tokens}}">
+        <div class="field is-grouped">
+            <p class="control is-expanded">
+                <input class="input is-primary" placeholder="type here..." autofocus type="text" name="prompt">
+            </p>
+            <p class="control">
+                <button id="submit" class="button is-primary">prompt</button>
+            </p>
+        </div>
+    </form>
+{{end}}

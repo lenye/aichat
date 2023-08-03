@@ -12,10 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package project
 
-import "github.com/lenye/aichat/cmd"
+import (
+	"os"
+	"strconv"
+)
 
-func main() {
-	cmd.Execute()
+const (
+	envDevelopmentMode = "DEV_MODE"
+)
+
+// devMode indicates whether the project is running in development mode.
+var devMode, _ = strconv.ParseBool(os.Getenv(envDevelopmentMode))
+
+// DevMode indicates whether the project is running in development mode.
+func DevMode() bool {
+	return devMode
 }

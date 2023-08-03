@@ -12,34 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package version
+package chatgpt
 
-import (
-	"fmt"
-	"runtime"
-)
-
-var (
-	AppName     = "aichat"  // 名称
-	Version     = "dev"     // 版本
-	BuildCommit = "none"    // git commit
-	BuildTime   = "unknown" // 编译时间
-
-	OpenSource = "https://github.com/lenye/aichat" // 开发人
-)
-
-const versionTemplate = `%s
-  Version:     %s
-  Commit:      %s
-  Built:       %s
-  Go version:  %s
-  OS/Arch:     %s/%s
-  Open source: %s
-`
-
-func Print() string {
-	return fmt.Sprintf(versionTemplate,
-		AppName, Version, BuildCommit, BuildTime,
-		runtime.Version(), runtime.GOOS, runtime.GOARCH,
-		OpenSource)
+type Message struct {
+	ID        string `json:"id,omitempty"`
+	User      string `json:"user,omitempty"`
+	Model     string `json:"model"`
+	Prompt    string `json:"prompt"`
+	System    string `json:"system,omitempty"`
+	Stream    bool   `json:"stream,omitempty"`
+	StreamID  string `json:"stream_id,omitempty"`
+	History   uint   `json:"history,omitempty"`
+	MaxTokens uint   `json:"max_tokens,omitempty"`
 }

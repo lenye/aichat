@@ -12,34 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package version
+package logging
 
 import (
-	"fmt"
-	"runtime"
+	"context"
+
+	"golang.org/x/exp/slog"
+
+	"github.com/lenye/aichat/pkg/web/contextkey"
 )
 
-var (
-	AppName     = "aichat"  // 名称
-	Version     = "dev"     // 版本
-	BuildCommit = "none"    // git commit
-	BuildTime   = "unknown" // 编译时间
+var loggerCtxKey = contextkey.New("slog.Logger")
 
-	OpenSource = "https://github.com/lenye/aichat" // 开发人
-)
+func WithContext(ctx context.Context, v *slog.Logger) context.Context {
+	return context.WithValue(ctx, loggerCtxKey, v)
+}
 
-const versionTemplate = `%s
-  Version:     %s
-  Commit:      %s
-  Built:       %s
-  Go version:  %s
-  OS/Arch:     %s/%s
-  Open source: %s
-`
+func FromContext(ctx context.Context) *slog.Logger {
+	v := ctx.Value(loggerCtxKey)
+	if v == nil {
+		return slog.Default()
+	}
 
-func Print() string {
-	return fmt.Sprintf(versionTemplate,
-		AppName, Version, BuildCommit, BuildTime,
-		runtime.Version(), runtime.GOOS, runtime.GOARCH,
-		OpenSource)
+	vv, ok := v.(*slog.Logger)
+	if !ok {
+		return slog.Default()
+	}
+	return vv
 }

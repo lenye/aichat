@@ -1,0 +1,13 @@
+{{define "head.gohtml" -}}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="build-time" content="{{.buildTime}}">
+    <meta name="build-commit" content="{{.buildCommit}}">
+    <meta name="version" content="{{.version}}">
+    <meta name="source" content="{{.source}}">
+    <title>{{.title}}</title>
+    <link rel="stylesheet" href="/static/css/bulma.min.css">
+    <script src="/static/js/htmx.min.js"></script>
+    <script src="/static/js/ext/sse.js"></script>
+    <script src="/static/js/hyperscript.min.js"></script>
+{{- end}}

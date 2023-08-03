@@ -12,34 +12,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package version
+package requestid
 
 import (
-	"fmt"
-	"runtime"
+	"encoding/hex"
+
+	"github.com/google/uuid"
 )
 
-var (
-	AppName     = "aichat"  // 名称
-	Version     = "dev"     // 版本
-	BuildCommit = "none"    // git commit
-	BuildTime   = "unknown" // 编译时间
+// New 请求id  长度 = 32 char
+func New() string {
+	return ToString(uuid.New())
+}
 
-	OpenSource = "https://github.com/lenye/aichat" // 开发人
-)
+func NewByes() []byte {
+	return ToBytes(uuid.New())
+}
 
-const versionTemplate = `%s
-  Version:     %s
-  Commit:      %s
-  Built:       %s
-  Go version:  %s
-  OS/Arch:     %s/%s
-  Open source: %s
-`
+func ToString(v uuid.UUID) string {
+	return string(ToBytes(v))
+}
 
-func Print() string {
-	return fmt.Sprintf(versionTemplate,
-		AppName, Version, BuildCommit, BuildTime,
-		runtime.Version(), runtime.GOOS, runtime.GOARCH,
-		OpenSource)
+func ToBytes(v uuid.UUID) []byte {
+	var buf [32]byte
+	encodeHex(buf[:], v)
+	return buf[:]
+}
+
+func encodeHex(dst []byte, v uuid.UUID) {
+	hex.Encode(dst, v[:4])
+	hex.Encode(dst[8:12], v[4:6])
+	hex.Encode(dst[12:16], v[6:8])
+	hex.Encode(dst[16:20], v[8:10])
+	hex.Encode(dst[20:], v[10:])
 }
