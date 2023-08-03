@@ -52,6 +52,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          # list of Docker images to use as base name for tags
+          images: |
+            ghcr.io/lenye/aichat
+          # generate Docker tags based on the following events/attributes
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+          labels: |
+            maintainer=lenye
+            org.opencontainers.image.source="https://github.com/lenye/aichat"
+            org.opencontainers.image.title=aichat
+            org.opencontainers.image.description="ai chat"
+            
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
 
@@ -71,6 +89,5 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64,linux/arm/v6,linux/arm/v7
           push: true
-          tags: |
-            ghcr.io/lenye/aichat:latest
-            ghcr.io/lenye/aichat:0.3.0
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
