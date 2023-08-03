@@ -1,7 +1,16 @@
 FROM alpine:3.18 AS build-env
 RUN apk --no-cache add ca-certificates tzdata
-COPY aichat /usr/local/bin
 RUN set -ex; \
+	apkArch="$(apk --print-arch)"; \
+	case "$apkArch" in \
+		armhf) arch='armv6' ;; \
+		armv7) arch='armv7' ;; \
+		aarch64) arch='arm64' ;; \
+		x86_64) arch='amd64_v2' ;; \
+		s390x) arch='s390x' ;; \
+		*) echo >&2 "error: unsupported architecture: $apkArch"; exit 1 ;; \
+	esac; \
+	COPY dist/aichat_linux_$arch/aichat /usr/local/bin; \
 	chmod +x /usr/local/bin/aichat
 
 
