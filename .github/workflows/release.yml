@@ -63,12 +63,6 @@ jobs:
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
-          labels: |
-            maintainer=lenye
-            org.opencontainers.image.source="https://github.com/lenye/aichat"
-            org.opencontainers.image.title=aichat
-            org.opencontainers.image.description="ai chat"
-            
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -90,4 +84,3 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/arm/v6,linux/arm/v7
           push: true
           tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}

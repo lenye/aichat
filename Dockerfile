@@ -24,3 +24,13 @@ EXPOSE 8080
 
 VOLUME ["/tmp"]
 ENTRYPOINT ["/aichat"]
+
+
+# Metadata
+LABEL org.opencontainers.image.vendor="lenye" \
+    org.opencontainers.image.url="https://github.com/lenye/aichat" \
+    org.opencontainers.image.source="https://github.com/lenye/aichat" \
+    org.opencontainers.image.title="AI Chat" \
+    org.opencontainers.image.description="AI Chat Bot" \
+    org.opencontainers.image.version="v0.3.0" \
+    org.opencontainers.image.documentation="https://github.com/lenye/aichat"
