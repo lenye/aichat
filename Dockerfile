@@ -7,7 +7,6 @@ RUN set -ex; \
 		armv7) arch='armv7' ;; \
 		aarch64) arch='arm64' ;; \
 		x86_64) arch='amd64' ;; \
-		s390x) arch='s390x' ;; \
 		*) echo >&2 "error: unsupported architecture: $apkArch"; exit 1 ;; \
 	esac; \
     wget --quiet -O /tmp/app.tar.gz "https://github.com/lenye/aichat/releases/download/v0.3.0/aichat_v0.3.0_linux_$arch.tar.gz"; \
