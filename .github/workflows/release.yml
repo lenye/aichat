@@ -34,39 +34,6 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
           check-latest: true
 
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v4
-        with:
-          version: latest
-          args: release --clean
-          workdir: go/src/github.com/lenye/aichat
-        env:
-          GITHUB_TOKEN: ${{ secrets.GO_RELEASER_GITHUB_TOKEN }}
-
-
-  docker:
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          # list of Docker images to use as base name for tags
-          images: |
-            ghcr.io/lenye/aichat
-          # generate Docker tags based on the following events/attributes
-          tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
@@ -77,10 +44,18 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GO_RELEASER_GITHUB_TOKEN }}
 
-      - name: Build and push
-        uses: docker/build-push-action@v4
+      - name: Docker Pull Base Image
+        run: |
+          docker pull --platform amd64 gcr.io/distroless/static-debian11
+          docker pull --platform arm64 gcr.io/distroless/static-debian11
+          docker pull --platform arm gcr.io/distroless/static-debian11
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v4
         with:
-          context: .
-          platforms: linux/amd64,linux/arm64,linux/arm/v6,linux/arm/v7
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          version: latest
+          args: release --clean
+          workdir: go/src/github.com/lenye/aichat
+        env:
+          GITHUB_TOKEN: ${{ secrets.GO_RELEASER_GITHUB_TOKEN }}
+

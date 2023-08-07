@@ -161,8 +161,8 @@ func setupLog(v *LogConfig) {
 	}
 	logger := slog.New(handler)
 	if err != nil {
-		logger.Warn("check log config",
-			slog.Any("error", err),
+		logger.Warn("user the default log flags",
+			slog.Any("warn", err),
 		)
 	}
 	slog.SetDefault(logger)
