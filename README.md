@@ -27,6 +27,11 @@ Flags:
   -v, --version                      version for aichat
 ```
 
+两种代理说明：
+
+1. --openai_proxy 直接代理示例: http://127.0.0.1:9080 或者 socks5://127.0.0.1:1080
+2. --openai_api_base_url 使用反向代理 https://github.com/lenye/chatgpt_reverse_proxy
+
 ### 命令行模式
 
 ```shell
@@ -41,6 +46,7 @@ Flags:
 ./aichat --openai_api_key=xxx
 time=2023-08-07T12:42:20.099+08:00 level=INFO msg="http server listening on [::]:8080"
 ```
+
 浏览器访问: http://localhost:8080/chat
 
 web不支持的参数: --openai_history
@@ -56,7 +62,7 @@ web不支持的参数: --openai_history
    ```shell
    $ docker run --rm ghcr.io/lenye/aichat --help
    ```
-   
+
 1. docker-compose.yml
    ```yaml
    services:
