@@ -1,6 +1,5 @@
 services:
 
-
   aichat:
     image: ghcr.io/lenye/aichat
     restart: unless-stopped
@@ -9,4 +8,4 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
     command:
-      - --openai_apikey=xxx
+      - --openai_api_key=XXX

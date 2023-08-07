@@ -102,7 +102,7 @@ func init() {
 	root.Flags().StringVar(&cfg.Log.Format, "log_format", "TEXT", "log message encode format: TEXT, JSON")
 
 	// http server 在console模式下不用
-	root.Flags().UintVar(&cfg.HttpServer.Port, "httpd_port", 8080, "httpd listen port")
+	root.Flags().UintVar(&cfg.HttpServer.Port, "httpd_port", 8080, "http server listen port")
 }
 
 func rootRun(cmd *cobra.Command, args []string) {
