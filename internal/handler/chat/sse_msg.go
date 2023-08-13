@@ -1,10 +1,24 @@
+// Copyright 2023 The aichat Authors. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package chat
 
 import (
-	"errors"
 	"log/slog"
 	"net/http"
 	"strconv"
+	"strings"
 	"sync"
 
 	"github.com/sashabaranov/go-openai"
@@ -13,32 +27,20 @@ import (
 	"github.com/lenye/aichat/internal/config"
 	"github.com/lenye/aichat/pkg/web/logging"
 	"github.com/lenye/aichat/pkg/web/render"
+	"github.com/lenye/aichat/pkg/web/sse"
 	"github.com/lenye/aichat/pkg/web/templatemap"
 )
 
-// Message 直接回复聊天响应消息 sse
-func Message(w http.ResponseWriter, r *http.Request) {
+// SseMessage sse server 回复聊天响应消息
+func SseMessage(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	m := templatemap.FromContext(ctx)
 	logger := logging.FromContext(ctx)
 
-	flusher, err := w.(http.Flusher)
-	if !err {
-		logger.Error("streaming unsupported")
-		render.Html500(w, r, errors.New("streaming unsupported"))
-		return
-	}
-
-	w.Header().Set("Content-Type", "text/event-stream; charset=utf-8")
-	w.Header().Set("Cache-Control", "no-cache")
-	w.Header().Set("Connection", "keep-alive")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	// nginx 添加X-Accel-Buffering=no的响应header，来告诉nginx不要对响应数据进行缓存。
-	w.Header().Set("X-Accel-Buffering", "no")
+	m := templatemap.FromContext(ctx)
 
 	streamID := r.PostFormValue("stream_id")
 	prompt := r.PostFormValue("prompt")
-	if prompt != "" {
+	if streamID != "" && prompt != "" {
 		in := &chatgpt.Message{
 			StreamID:  streamID,
 			ID:        "",
@@ -68,8 +70,12 @@ func Message(w http.ResponseWriter, r *http.Request) {
 			slog.Any("data", in),
 		)
 
-		w.WriteHeader(http.StatusOK)
-		flusher.Flush()
+		// user prompt
+		inMsg := strings.Replace(prompt, "\r", "", -1)
+		inMsg = strings.Replace(inMsg, "\n", "<br>", -1)
+		sse.Default().Publish(in.StreamID, &sse.Event{
+			Data: []byte("<p class=\"has-text-info\">" + inMsg + "</p>"),
+		})
 
 		var hisMsg []openai.ChatCompletionMessage // 聊天记录
 		chatReq := chatgpt.MakeChatRequest(in, hisMsg)
@@ -82,7 +88,7 @@ func Message(w http.ResponseWriter, r *http.Request) {
 			defer wg.Done()
 			chatgpt.HttpChatCompletion(r, config.Default().OpenAI, chatReq, chStr)
 		}()
-		messages := chatgpt.HttpChatResponseProcess(w, r, chStr)
+		messages := chatgpt.SSEServerChatResponseProcess(r, in.StreamID, chStr)
 		logger.Debug("ai",
 			slog.String("msg", messages),
 		)

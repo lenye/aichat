@@ -15,10 +15,9 @@
 package middleware
 
 import (
+	"log/slog"
 	"net/http"
 	"time"
-
-	"golang.org/x/exp/slog"
 
 	"github.com/lenye/aichat/pkg/web"
 	"github.com/lenye/aichat/pkg/web/logging"
@@ -26,7 +25,7 @@ import (
 )
 
 // AccessLog 访问日志
-func AccessLog(name string, isRequestID bool) func(http.Handler) http.Handler {
+func AccessLog(name string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now()
@@ -34,7 +33,7 @@ func AccessLog(name string, isRequestID bool) func(http.Handler) http.Handler {
 			ctx := r.Context()
 
 			// logger
-			logger := slog.Default()
+			logger := slog.Default().WithGroup(name)
 
 			ctx = logging.WithContext(ctx, logger)
 			next.ServeHTTP(ww, r.WithContext(ctx))
@@ -45,7 +44,6 @@ func AccessLog(name string, isRequestID bool) func(http.Handler) http.Handler {
 				slog.String("method", r.Method),
 				slog.Any("url", r.URL),
 				slog.Int("content_length", ww.ContentLength),
-				slog.String("remote", r.RemoteAddr),
 				slog.String("ip", realip.ClientIP(r)),
 				slog.String("user_agent", r.UserAgent()),
 			)

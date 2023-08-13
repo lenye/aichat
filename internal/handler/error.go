@@ -15,11 +15,10 @@
 package handler
 
 import (
+	"log/slog"
 	"net/http"
 	"runtime/debug"
 	"time"
-
-	"golang.org/x/exp/slog"
 
 	"github.com/lenye/aichat/pkg/web"
 	"github.com/lenye/aichat/pkg/web/realip"

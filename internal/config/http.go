@@ -18,12 +18,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net"
 	"net/http"
 	"sync"
 	"time"
-
-	"golang.org/x/exp/slog"
 )
 
 func HttpListenAndServe(handler http.Handler,

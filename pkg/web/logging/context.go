@@ -16,8 +16,7 @@ package logging
 
 import (
 	"context"
-
-	"golang.org/x/exp/slog"
+	"log/slog"
 
 	"github.com/lenye/aichat/pkg/web/contextkey"
 )

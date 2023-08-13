@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"os/signal"
 	"sync"
@@ -24,7 +25,6 @@ import (
 
 	"github.com/sashabaranov/go-openai"
 	"github.com/spf13/cobra"
-	"golang.org/x/exp/slog"
 
 	"github.com/lenye/aichat/assets"
 	"github.com/lenye/aichat/internal/chatgpt"
@@ -91,7 +91,7 @@ func init() {
 	root.Flags().StringVar(&cfg.OpenAI.ApiBaseUrl, "openai_api_base_url", "", "openai api base url")
 	root.Flags().StringVar(&cfg.OpenAI.Proxy, "openai_proxy", "", "openai proxy")
 	root.Flags().StringVar(&cfg.OpenAI.Model, "openai_model", openai.GPT3Dot5Turbo, "openai chat message model")
-	root.Flags().StringVar(&cfg.OpenAI.System, "openai_system", "", "openai chat message role system")
+	root.Flags().StringVar(&cfg.OpenAI.System, "openai_system", "", "openai chat message system prompt")
 	root.Flags().BoolVar(&cfg.OpenAI.Stream, "openai_stream", true, "openai chat message stream mode")
 	root.Flags().UintVar(&cfg.OpenAI.MaxTokens, "openai_max_tokens", 0, "openai chat message max tokens")
 	root.Flags().UintVar(&cfg.OpenAI.History, "openai_history", 0, "openai chat message history")

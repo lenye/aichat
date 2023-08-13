@@ -18,12 +18,12 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strings"
 
 	"github.com/sashabaranov/go-openai"
-	"golang.org/x/exp/slog"
 
 	"github.com/lenye/aichat/internal/config"
 	"github.com/lenye/aichat/pkg/web/logging"
@@ -80,9 +80,6 @@ func chatErr(tag string, err error, chStr chan<- string, logger *slog.Logger) er
 		if urlErr.Timeout() {
 			chStr <- "[[请求超时]]"
 		}
-		// retry
-		// if urlErr.Timeout() {
-		// }
 		return nil
 	}
 	chStr <- fmt.Sprintf("[[%s]]", err.Error())
@@ -124,8 +121,6 @@ func HttpChatCompletion(r *http.Request,
 		}
 		defer streamReader.Close()
 
-		// var finishReason openai.FinishReason
-		// var sb strings.Builder
 		for {
 			select {
 			case <-ctx.Done():
@@ -154,13 +149,6 @@ func HttpChatCompletion(r *http.Request,
 			)
 
 			for _, choice := range resp.Choices {
-				// // FinishReason
-				// if choice.FinishReason != "" {
-				// 	finishReason = choice.FinishReason
-				// }
-
-				// Content
-				// sb.WriteString(choice.Delta.Content)
 				if choice.Delta.Content != "" {
 					chStr <- choice.Delta.Content
 				}
@@ -184,8 +172,8 @@ func HttpChatCompletion(r *http.Request,
 	}
 }
 
-// HttpChatResponseProcess http sse 处理请求结果
-func HttpChatResponseProcess(r *http.Request,
+// SSEServerChatResponseProcess http sse 处理请求结果
+func SSEServerChatResponseProcess(r *http.Request,
 	streamID string,
 	chStr <-chan string) string {
 	ctx := r.Context()
@@ -204,6 +192,35 @@ func HttpChatResponseProcess(r *http.Request,
 			str = strings.Replace(str, "\r", "", -1)
 			str = strings.Replace(str, "\n", "<br>", -1)
 			sse.Default().Publish(streamID, &sse.Event{Data: []byte(str)})
+		}
+	}
+}
+
+// HttpChatResponseProcess http sse 处理请求结果
+func HttpChatResponseProcess(w http.ResponseWriter, r *http.Request,
+	chStr <-chan string) string {
+	ctx := r.Context()
+	logger := logging.FromContext(ctx)
+	flusher, _ := w.(http.Flusher)
+	var messages strings.Builder
+	for {
+		select {
+		case <-ctx.Done():
+			return messages.String()
+		case str, ok := <-chStr:
+			if !ok {
+				// 已被关闭
+				return messages.String()
+			}
+			messages.WriteString(str)
+			_, err := fmt.Fprintf(w, "data: %s\n\n", strings.Replace(str, "\n", "\ndata: ", -1))
+			if err != nil {
+				logger.Error("write stream failed",
+					slog.Any("error", err),
+				)
+				return ""
+			}
+			flusher.Flush()
 		}
 	}
 }

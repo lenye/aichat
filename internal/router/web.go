@@ -32,7 +32,7 @@ func New() *httprouter.Router {
 	r := httprouter.New()
 	name := "httpd"
 	stdPipe := alice.New(
-		middleware.AccessLog(name, true),
+		middleware.AccessLog(name),
 	)
 
 	r.PanicHandler = handler.Panic()
@@ -57,10 +57,11 @@ func New() *httprouter.Router {
 	// sse
 	r.Handler(http.MethodGet, "/chat/sse", stdPipe.ThenFunc(sse.Default().ServeHTTP))
 
-	// sse tpl
+	// tpl
 	tplPipe := stdPipe.Append(middleware.TemplateMap)
 	r.Handler(http.MethodGet, "/chat", tplPipe.ThenFunc(chat.Chat))
-	r.Handler(http.MethodPost, "/chat/msg", tplPipe.ThenFunc(chat.Message))
+	r.Handler(http.MethodPost, "/chat/sse/msg", tplPipe.ThenFunc(chat.SseMessage))
+	// r.Handler(http.MethodPost, "/chat/msg", tplPipe.ThenFunc(chat.Message))
 
 	return r
 }

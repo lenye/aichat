@@ -18,9 +18,8 @@ import (
 	"bytes"
 	"fmt"
 	"html"
+	"log/slog"
 	"net/http"
-
-	"golang.org/x/exp/slog"
 
 	"github.com/lenye/aichat/pkg/web/logging"
 )

@@ -17,6 +17,7 @@ package config
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -24,7 +25,6 @@ import (
 	"sync/atomic"
 
 	"github.com/sashabaranov/go-openai"
-	"golang.org/x/exp/slog"
 
 	"github.com/lenye/aichat/pkg/project"
 )
