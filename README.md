@@ -11,7 +11,6 @@ Usage:
 Flags:
       --console                      running console mode
   -h, --help                         help for aichat
-      --httpd_port uint              httpd listen port (default 8080)
       --log_caller                   log annotate each message with the filename, line number and function name
       --log_format string            log message encode format: TEXT, JSON (default "TEXT")
       --log_level string             log message level: DEBUG, INFO, WARN, ERROR (default "INFO")
@@ -25,6 +24,7 @@ Flags:
       --openai_stream                openai chat message stream mode (default true)
       --openai_system string         openai chat message role system
   -v, --version                      version for aichat
+      --web_port uint                http server listen port (default 8080)
 ```
 
 两种代理说明：
@@ -39,6 +39,13 @@ Flags:
 ---------------------
 >
 ```
+
+未使用参数
+
+* --log_caller
+* --log_format
+* --log_level
+* --web_port
 
 ### web模式
 
