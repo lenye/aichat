@@ -15,7 +15,6 @@
 package chat
 
 import (
-	"log/slog"
 	"net/http"
 	"strconv"
 	"strings"
@@ -67,7 +66,7 @@ func SseMessage(w http.ResponseWriter, r *http.Request) {
 		}
 
 		logger.Debug("input",
-			slog.Any("data", in),
+			"data", in,
 		)
 
 		// user prompt
@@ -90,7 +89,7 @@ func SseMessage(w http.ResponseWriter, r *http.Request) {
 		}()
 		messages := chatgpt.SSEServerChatResponseProcess(r, in.StreamID, chStr)
 		logger.Debug("ai",
-			slog.String("msg", messages),
+			"msg", messages,
 		)
 
 		wg.Wait()

@@ -55,14 +55,14 @@ func Panic() func(w http.ResponseWriter, r *http.Request, p any) {
 		InternalServerError(ww, r, p.(error))
 
 		slog.Error("panic",
-			slog.Duration("duration", time.Since(start)),
-			slog.Int("status", ww.StatusCode),
-			slog.String("method", r.Method),
-			slog.Any("url", r.URL),
-			slog.String("ip", realip.ClientIP(r)),
-			slog.String("user_agent", r.UserAgent()),
-			slog.Any("error", p),
-			slog.String("Stack", string(debug.Stack())),
+			"duration", time.Since(start),
+			"status", ww.StatusCode,
+			"method", r.Method,
+			"url", r.URL,
+			"ip", realip.ClientIP(r),
+			"user_agent", r.UserAgent(),
+			"error", p,
+			"Stack", string(debug.Stack()),
 		)
 	}
 }

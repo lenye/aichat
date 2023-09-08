@@ -30,7 +30,7 @@ import (
 
 func New() *httprouter.Router {
 	r := httprouter.New()
-	name := "httpd"
+	name := "web"
 	stdPipe := alice.New(
 		middleware.AccessLog(name),
 	)

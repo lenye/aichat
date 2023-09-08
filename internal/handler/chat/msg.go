@@ -2,7 +2,6 @@ package chat
 
 import (
 	"errors"
-	"log/slog"
 	"net/http"
 	"strconv"
 	"sync"
@@ -65,7 +64,7 @@ func Message(w http.ResponseWriter, r *http.Request) {
 		}
 
 		logger.Debug("input",
-			slog.Any("data", in),
+			"data", in,
 		)
 
 		w.WriteHeader(http.StatusOK)
@@ -84,7 +83,7 @@ func Message(w http.ResponseWriter, r *http.Request) {
 		}()
 		messages := chatgpt.HttpChatResponseProcess(w, r, chStr)
 		logger.Debug("ai",
-			slog.String("msg", messages),
+			"msg", messages,
 		)
 
 		wg.Wait()

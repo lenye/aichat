@@ -40,7 +40,7 @@ import (
 var (
 	appPath string
 
-	cfg *config.Config
+	cfg *config.Configuration
 )
 
 var root = &cobra.Command{
@@ -65,7 +65,7 @@ func Execute() {
 	if err := root.Execute(); err != nil {
 		logger := slog.Default()
 		logger.Error("invalid command flags",
-			slog.Any("error", err),
+			"error", err,
 		)
 		// fmt.Println(err)
 		os.Exit(1)
@@ -74,7 +74,7 @@ func Execute() {
 
 func init() {
 	if project.DevMode() {
-		appPath = project.Root("cmd", "app")
+		appPath = project.Root("cmd", "aichat")
 	}
 	cfg = config.New(appPath)
 
@@ -102,7 +102,7 @@ func init() {
 	root.Flags().StringVar(&cfg.Log.Format, "log_format", "TEXT", "log message encode format: TEXT, JSON")
 
 	// http server 在console模式下不用
-	root.Flags().UintVar(&cfg.HttpServer.Port, "httpd_port", 8080, "http server listen port")
+	root.Flags().UintVar(&cfg.HttpServer.Port, "web_port", 8080, "http server listen port")
 }
 
 func rootRun(cmd *cobra.Command, args []string) {
@@ -112,7 +112,7 @@ func rootRun(cmd *cobra.Command, args []string) {
 	if err := config.Setup(cfg); err != nil {
 		logger = slog.Default()
 		logger.Error("config setup failed",
-			slog.Any("error", err),
+			"error", err,
 		)
 		// fmt.Println(err)
 		return
@@ -142,7 +142,7 @@ func rootRun(cmd *cobra.Command, args []string) {
 		render.SetFileSystem(assets.HtmlFS())
 		if err := render.LoadTemplates(); err != nil {
 			logger.Error("render.LoadTemplates failed",
-				slog.Any("error", err),
+				"error", err,
 			)
 			return
 		}
@@ -166,7 +166,7 @@ func rootRun(cmd *cobra.Command, args []string) {
 
 		s := <-signalChan
 		logger.Debug("received signal",
-			slog.Any("signal", s),
+			"signal", s,
 		)
 
 		config.HttpShutdown(httpd, logger)
@@ -175,6 +175,6 @@ func rootRun(cmd *cobra.Command, args []string) {
 	}
 
 	logger.Info(version.AppName+" exit",
-		slog.Duration("uptime", time.Since(start)),
+		"uptime", time.Since(start),
 	)
 }

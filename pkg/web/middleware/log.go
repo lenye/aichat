@@ -39,13 +39,13 @@ func AccessLog(name string) func(http.Handler) http.Handler {
 			next.ServeHTTP(ww, r.WithContext(ctx))
 
 			logger.Info("access",
-				slog.Duration("duration", time.Since(start)),
-				slog.Int("status", ww.StatusCode),
-				slog.String("method", r.Method),
-				slog.Any("url", r.URL),
-				slog.Int("content_length", ww.ContentLength),
-				slog.String("ip", realip.ClientIP(r)),
-				slog.String("user_agent", r.UserAgent()),
+				"duration", time.Since(start),
+				"status", ww.StatusCode,
+				"method", r.Method,
+				"url", r.URL,
+				"size", ww.ContentLength,
+				"ip", realip.ClientIP(r),
+				"user_agent", r.UserAgent(),
 			)
 		})
 	}

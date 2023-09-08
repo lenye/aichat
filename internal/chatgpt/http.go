@@ -41,15 +41,15 @@ func chatErr(tag string, err error, chStr chan<- string, logger *slog.Logger) er
 
 	if errors.As(err, &reqErr) {
 		logger.Error(tag,
-			slog.Any("error", reqErr),
-			slog.String("type", "openai.RequestError"),
+			"error", reqErr,
+			"type", "openai.RequestError",
 		)
 		chStr <- "[[错误请求]]"
 		return nil
 	} else if errors.As(err, &apiErr) {
 		logger.Error(tag,
-			slog.Any("error", apiErr),
-			slog.String("type", "openai.APIError"),
+			"error", apiErr,
+			"type", "openai.APIError",
 		)
 		switch apiErr.HTTPStatusCode {
 		case 504, 500, 503:
@@ -74,8 +74,8 @@ func chatErr(tag string, err error, chStr chan<- string, logger *slog.Logger) er
 		return nil
 	} else if errors.As(err, &urlErr) {
 		logger.Error(tag,
-			slog.Any("error", urlErr),
-			slog.String("type", "url.Error"),
+			"error", urlErr,
+			"type", "url.Error",
 		)
 		if urlErr.Timeout() {
 			chStr <- "[[请求超时]]"
@@ -94,14 +94,14 @@ func HttpChatCompletion(r *http.Request,
 	ctx := r.Context()
 	logger := logging.FromContext(ctx)
 	logger.Debug("HttpChatCompletion",
-		slog.Any("openai.ChatCompletionRequest", req),
+		"openai.ChatCompletionRequest", req,
 	)
 
 	client, err := NewOpenAIClient(cfg.ApiKey, cfg.ApiType, cfg.ApiBaseUrl, cfg.Proxy)
 	if err != nil {
 		logger.Error("NewOpenAIClient failed",
-			slog.Any("error", err),
-			slog.Any("config", cfg),
+			"error", err,
+			"config", cfg,
 		)
 		chStr <- fmt.Sprintf("[[%s]]", err.Error())
 		close(chStr)
@@ -113,7 +113,7 @@ func HttpChatCompletion(r *http.Request,
 		if err != nil {
 			if err := chatErr("CreateChatCompletionStream failed", err, chStr, logger); err != nil {
 				logger.Error("CreateChatCompletionStream failed",
-					slog.String("error", err.Error()),
+					"error", err.Error(),
 				)
 			}
 			close(chStr)
@@ -136,7 +136,7 @@ func HttpChatCompletion(r *http.Request,
 					// Stream finished
 				} else {
 					logger.Error("read stream failed",
-						slog.Any("error", err),
+						"error", err,
 					)
 					chStr <- fmt.Sprintf("[[%s]]", err.Error())
 				}
@@ -145,7 +145,7 @@ func HttpChatCompletion(r *http.Request,
 			}
 
 			logger.Debug("stream",
-				slog.Any("response", resp),
+				"response", resp,
 			)
 
 			for _, choice := range resp.Choices {
@@ -159,7 +159,7 @@ func HttpChatCompletion(r *http.Request,
 		if err != nil {
 			if err := chatErr("CreateChatCompletion failed", err, chStr, logger); err != nil {
 				logger.Error("CreateChatCompletion failed",
-					slog.Any("error", err),
+					"error", err,
 				)
 			}
 			chStr <- fmt.Sprintf("[[%s]]", err.Error())
@@ -216,7 +216,7 @@ func HttpChatResponseProcess(w http.ResponseWriter, r *http.Request,
 			_, err := fmt.Fprintf(w, "data: %s\n\n", strings.Replace(str, "\n", "\ndata: ", -1))
 			if err != nil {
 				logger.Error("write stream failed",
-					slog.Any("error", err),
+					"error", err,
 				)
 				return ""
 			}

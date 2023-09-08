@@ -18,7 +18,6 @@ import (
 	"bytes"
 	"fmt"
 	"html"
-	"log/slog"
 	"net/http"
 
 	"github.com/lenye/aichat/pkg/web/logging"
@@ -58,16 +57,16 @@ func HtmlStatus(w http.ResponseWriter, r *http.Request, statusCode int, tmpl str
 	// they can update their applications to handle that new response statusCode.
 	if !AllowedResponseCode(statusCode) {
 		logging.FromContext(ctx).Error("unregistered response statusCode",
-			slog.Int("statusCode", statusCode),
-			slog.String("func", "HtmlStatus"),
+			"statusCode", statusCode,
+			"func", "HtmlStatus",
 		)
 
 		w.WriteHeader(http.StatusInternalServerError)
 		msg := fmt.Sprintf("%d is not a registered response statusCode", statusCode)
 		if _, wErr := fmt.Fprintf(w, htmlErrTmpl, msg); wErr != nil {
 			logging.FromContext(ctx).Error("failed to write html to response",
-				slog.Any("error", wErr),
-				slog.String("func", "HtmlStatus"),
+				"error", wErr,
+				"func", "HtmlStatus",
 			)
 		}
 		return
@@ -76,16 +75,16 @@ func HtmlStatus(w http.ResponseWriter, r *http.Request, statusCode int, tmpl str
 	if isDebug {
 		if err := LoadTemplates(); err != nil {
 			logging.FromContext(ctx).Error("failed to reload templates in renderer",
-				slog.Any("error", err),
-				slog.String("func", "HtmlStatus"),
+				"error", err,
+				"func", "HtmlStatus",
 			)
 
 			msg := html.EscapeString(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			if _, wErr := fmt.Fprintf(w, htmlErrTmpl, msg); wErr != nil {
 				logging.FromContext(ctx).Error("failed to write html to response",
-					slog.Any("error", wErr),
-					slog.String("func", "HtmlStatus"),
+					"error", wErr,
+					"func", "HtmlStatus",
 				)
 			}
 			return
@@ -100,8 +99,8 @@ func HtmlStatus(w http.ResponseWriter, r *http.Request, statusCode int, tmpl str
 	// Render into the renderer
 	if err := executeHTMLTemplate(b, tmpl, data); err != nil {
 		logging.FromContext(ctx).Error("failed to execute html template",
-			slog.Any("error", err),
-			slog.String("func", "HtmlStatus"),
+			"error", err,
+			"func", "HtmlStatus",
 		)
 
 		msg := "An internal error occurred."
@@ -113,8 +112,8 @@ func HtmlStatus(w http.ResponseWriter, r *http.Request, statusCode int, tmpl str
 		w.WriteHeader(http.StatusInternalServerError)
 		if _, wErr := fmt.Fprintf(w, htmlErrTmpl, msg); wErr != nil {
 			logging.FromContext(ctx).Error("failed to write html to response",
-				slog.Any("error", wErr),
-				slog.String("func", "HtmlStatus"),
+				"error", wErr,
+				"func", "HtmlStatus",
 			)
 		}
 		return
@@ -127,8 +126,8 @@ func HtmlStatus(w http.ResponseWriter, r *http.Request, statusCode int, tmpl str
 		// content type if we got this far, so the best option we have is to log the
 		// error.
 		logging.FromContext(ctx).Error("failed to write html to response",
-			slog.Any("error", err),
-			slog.String("func", "HtmlStatus"),
+			"error", err,
+			"func", "HtmlStatus",
 		)
 	}
 }

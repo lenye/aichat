@@ -35,7 +35,7 @@ func HttpListenAndServe(handler http.Handler,
 	ln, err := net.Listen("tcp", address)
 	if err != nil {
 		logger.Error("start http server failed",
-			slog.Any("error", err),
+			"error", err,
 		)
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func HttpListenAndServe(handler http.Handler,
 		defer wg.Done()
 		if err := svr.Serve(ln); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			logger.Error("http serve failed",
-				slog.Any("error", err),
+				"error", err,
 			)
 		}
 		logger.Info("http server stopped")
@@ -67,7 +67,7 @@ func HttpShutdown(svr *http.Server, logger *slog.Logger) {
 	defer cancel()
 	if err := svr.Shutdown(ctx); err != nil {
 		logger.Error("http server shutdown failed",
-			slog.Any("error", err),
+			"error", err,
 		)
 	}
 	logger.Info("http server shutdown")

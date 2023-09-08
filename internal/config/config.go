@@ -35,19 +35,19 @@ func init() {
 	defaultConfig.Store(New(""))
 }
 
-// Default returns the default Config.
-func Default() *Config {
-	return defaultConfig.Load().(*Config)
+// Default returns the default Configuration.
+func Default() *Configuration {
+	return defaultConfig.Load().(*Configuration)
 }
 
-// SetDefault makes v the default Config.
-func SetDefault(v *Config) {
+// SetDefault makes v the default Configuration.
+func SetDefault(v *Configuration) {
 	defaultConfig.Store(v)
 }
 
 // New init config
-func New(appDirIn string) *Config {
-	v := &Config{
+func New(appDirIn string) *Configuration {
+	v := &Configuration{
 		App: &AppConfig{
 			Path: project.ExecAppPath(),
 		},
@@ -68,22 +68,19 @@ func New(appDirIn string) *Config {
 	return v
 }
 
-// Config 配置
-type Config struct {
+// Configuration 配置
+type Configuration struct {
 	App        *AppConfig        `json:"app"`    // 程序运行目录
 	Log        *LogConfig        `json:"log"`    // 日志
-	HttpServer *HttpServerConfig `json:"httpd"`  // http server
+	HttpServer *HttpServerConfig `json:"web"`    // http server
 	OpenAI     *OpenAIConfig     `json:"openai"` // openai
 }
 
 // Print 打印配置
-func (p *Config) Print() {
-	slog.Debug("config",
+func (p *Configuration) Print() {
+	slog.Debug("configuration",
 		slog.Group("config",
-			slog.Any("app", p.App),
-			slog.Any("log", p.Log),
-			slog.Any("http_server", p.HttpServer),
-			slog.Any("openai", p.OpenAI),
+			"app", p.App, "log", p.Log, "web", p.HttpServer, "openai", p.OpenAI,
 		),
 	)
 }
@@ -162,7 +159,7 @@ func setupLog(v *LogConfig) {
 	logger := slog.New(handler)
 	if err != nil {
 		logger.Warn("user the default log flags",
-			slog.Any("warn", err),
+			"error", err,
 		)
 	}
 	slog.SetDefault(logger)
@@ -195,7 +192,7 @@ func checkOpenAIConfig(v *OpenAIConfig) error {
 	return nil
 }
 
-func Setup(v *Config) error {
+func Setup(v *Configuration) error {
 	// log
 	setupLog(v.Log)
 
