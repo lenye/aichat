@@ -33,13 +33,16 @@ func Chat(client *openai.Client, in *chatgpt.Message) {
 	var hisMsg []openai.ChatCompletionMessage // 聊天记录
 	// 会话
 	fmt.Println("---------------------")
+	if in.System != "" {
+		fmt.Println(in.System)
+	}
 	fmt.Print("> ")
 
 	// 用户输入
 	s := bufio.NewScanner(os.Stdin)
 	for s.Scan() {
-		input := s.Text()
-		if strings.TrimSpace(input) != "" {
+		input := strings.TrimSpace(s.Text())
+		if input != "" {
 			in.Prompt = input
 			req := chatgpt.MakeChatRequest(in, hisMsg)
 			if msg, err := chatCompletion(ctx, client, req); err == nil {
