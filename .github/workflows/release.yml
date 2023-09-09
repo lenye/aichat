@@ -40,6 +40,12 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GO_RELEASER_GITHUB_TOKEN }}
 
+      - name: Docker Pull Base Image
+        run: |
+          docker pull --platform amd64 gcr.io/distroless/static-debian12
+          docker pull --platform arm64 gcr.io/distroless/static-debian12
+          docker pull --platform arm gcr.io/distroless/static-debian12
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v4
         with:
