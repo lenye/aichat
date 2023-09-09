@@ -56,8 +56,8 @@ func New(appDirIn string) *Configuration {
 			Level:  "info",
 			Format: "text",
 		},
-		HttpServer: new(HttpServerConfig),
-		OpenAI:     new(OpenAIConfig),
+		Web:    new(WebServerConfig),
+		OpenAI: new(OpenAIConfig),
 	}
 	if appDirIn == "" {
 		v.App.Dir = filepath.Dir(v.App.Path)
@@ -70,17 +70,17 @@ func New(appDirIn string) *Configuration {
 
 // Configuration 配置
 type Configuration struct {
-	App        *AppConfig        `json:"app"`    // 程序运行目录
-	Log        *LogConfig        `json:"log"`    // 日志
-	HttpServer *HttpServerConfig `json:"web"`    // http server
-	OpenAI     *OpenAIConfig     `json:"openai"` // openai
+	App    *AppConfig       `json:"app"`    // 程序运行目录
+	Log    *LogConfig       `json:"log"`    // 日志
+	Web    *WebServerConfig `json:"web"`    // web server
+	OpenAI *OpenAIConfig    `json:"openai"` // openai
 }
 
 // Print 打印配置
 func (p *Configuration) Print() {
 	slog.Debug("configuration",
 		slog.Group("config",
-			"app", p.App, "log", p.Log, "web", p.HttpServer, "openai", p.OpenAI,
+			"app", p.App, "log", p.Log, "web", p.Web, "openai", p.OpenAI,
 		),
 	)
 }
@@ -98,8 +98,8 @@ type LogConfig struct {
 	Format string `yaml:"format,omitempty"` // 日志输出格式 text, json
 }
 
-// HttpServerConfig http server配置
-type HttpServerConfig struct {
+// WebServerConfig web server配置
+type WebServerConfig struct {
 	Port uint `json:"port"` // 服务端口
 }
 
@@ -118,7 +118,7 @@ type OpenAIConfig struct {
 
 func setupLog(v *LogConfig) {
 	opts := &slog.HandlerOptions{
-		AddSource: v.Caller,
+		AddSource: false,
 	}
 	var (
 		err error
@@ -128,6 +128,7 @@ func setupLog(v *LogConfig) {
 	switch lv {
 	case slog.LevelDebug.String():
 		lvv.Set(slog.LevelDebug)
+		opts.AddSource = true
 	case slog.LevelInfo.String():
 		lvv.Set(slog.LevelInfo)
 	case slog.LevelWarn.String():

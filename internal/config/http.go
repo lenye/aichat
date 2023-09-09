@@ -25,8 +25,8 @@ import (
 	"time"
 )
 
-func HttpListenAndServe(handler http.Handler,
-	cfg *HttpServerConfig,
+func WebListenAndServe(handler http.Handler,
+	cfg *WebServerConfig,
 	wg *sync.WaitGroup,
 	logger *slog.Logger) (*http.Server, error) {
 
@@ -34,12 +34,12 @@ func HttpListenAndServe(handler http.Handler,
 	// http server
 	ln, err := net.Listen("tcp", address)
 	if err != nil {
-		logger.Error("start http server failed",
+		logger.Error("start web server failed",
 			"error", err,
 		)
 		return nil, err
 	}
-	logger.Info("http server listening on " + ln.Addr().String())
+	logger.Info("web server listening on " + ln.Addr().String())
 
 	svr := &http.Server{
 		Handler: handler,
@@ -48,27 +48,27 @@ func HttpListenAndServe(handler http.Handler,
 	go func() {
 		defer wg.Done()
 		if err := svr.Serve(ln); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			logger.Error("http serve failed",
+			logger.Error("web serve failed",
 				"error", err,
 			)
 		}
-		logger.Info("http server stopped")
+		logger.Info("web server stopped")
 	}()
 
 	return svr, nil
 }
 
-func HttpShutdown(svr *http.Server, logger *slog.Logger) {
+func WebShutdown(svr *http.Server, logger *slog.Logger) {
 	if svr == nil {
-		logger.Debug("http server is not running, skip to shutdown")
+		logger.Debug("web server is not running, skip to shutdown")
 		return
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := svr.Shutdown(ctx); err != nil {
-		logger.Error("http server shutdown failed",
+		logger.Error("web server shutdown failed",
 			"error", err,
 		)
 	}
-	logger.Info("http server shutdown")
+	logger.Info("web server shutdown")
 }

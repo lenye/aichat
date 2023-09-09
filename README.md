@@ -9,22 +9,21 @@ Usage:
   aichat [flags]
 
 Flags:
-      --console                      running console mode
   -h, --help                         help for aichat
-      --log_caller                   log annotate each message with the filename, line number and function name
-      --log_format string            log message encode format: TEXT, JSON (default "TEXT")
-      --log_level string             log message level: DEBUG, INFO, WARN, ERROR (default "INFO")
+      --log_format string            log message encode format: text, json (default "text")
+      --log_level string             log message level: debug, info, warn, error (default "info")
+      --mode string                  running mode: console, web (default "console")
       --openai_api_base_url string   openai api base url
       --openai_api_key string        openai api key (required)
-      --openai_api_type string       openai api type: OPEN_AI, AZURE (default "OPEN_AI")
+      --openai_api_type string       openai api type: open_ai, azure (default "OPEN_AI")
       --openai_history uint          openai chat message history
       --openai_max_tokens uint       openai chat message max tokens
       --openai_model string          openai chat message model (default "gpt-3.5-turbo")
       --openai_proxy string          openai proxy
       --openai_stream                openai chat message stream mode (default true)
-      --openai_system string         openai chat message role system
+      --openai_system string         openai chat message system prompt
   -v, --version                      version for aichat
-      --web_port uint                http server listen port (default 8080)
+      --web_port uint                web server listen port (default 8080)
 ```
 
 两种代理说明：
@@ -35,22 +34,15 @@ Flags:
 ### 命令行模式
 
 ```shell
-./aichat --openai_api_key=xxx --console
+./aichat --openai_api_key=xxx
 ---------------------
 >
 ```
 
-未使用参数
-
-* --log_caller
-* --log_format
-* --log_level
-* --web_port
-
 ### web模式
 
 ```shell
-./aichat --openai_api_key=xxx
+./aichat --openai_api_key=xxx --mode=web
 time=2023-08-07T12:42:20.099+08:00 level=INFO msg="http server listening on [::]:8080"
 ```
 
@@ -82,8 +74,8 @@ web不支持的参数: --openai_history
        volumes:
          - /etc/localtime:/etc/localtime:ro
        command:
+         - --mode=web   
          - --openai_api_key=XXX
-   
    ```
 
 ## 源代码

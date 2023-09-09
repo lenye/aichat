@@ -19,6 +19,7 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -55,8 +56,13 @@ var root = &cobra.Command{
 	Run:  rootRun,
 }
 
-// flagConsole 控制台模式
-var flagConsole bool
+// flagRunningMode 控制台模式
+var flagRunningMode string
+
+const (
+	consoleMode = "console"
+	webMode     = "web"
+)
 
 func Execute() {
 
@@ -82,10 +88,10 @@ func init() {
 	root.Version = version.Print()
 
 	// console 控制台模式
-	root.Flags().BoolVar(&flagConsole, "console", false, "running console mode")
+	root.Flags().StringVar(&flagRunningMode, "mode", "console", "running mode: console, web")
 
 	// openai
-	root.Flags().StringVar(&cfg.OpenAI.ApiType, "openai_api_type", string(openai.APITypeOpenAI), "openai api type: OPEN_AI, AZURE")
+	root.Flags().StringVar(&cfg.OpenAI.ApiType, "openai_api_type", string(openai.APITypeOpenAI), "openai api type: open_ai, azure")
 	root.Flags().StringVar(&cfg.OpenAI.ApiKey, "openai_api_key", "", "openai api key (required)")
 	_ = root.MarkFlagRequired("openai_api_key")
 	root.Flags().StringVar(&cfg.OpenAI.ApiBaseUrl, "openai_api_base_url", "", "openai api base url")
@@ -96,17 +102,22 @@ func init() {
 	root.Flags().UintVar(&cfg.OpenAI.MaxTokens, "openai_max_tokens", 0, "openai chat message max tokens")
 	root.Flags().UintVar(&cfg.OpenAI.History, "openai_history", 0, "openai chat message history")
 
-	// log 在console模式下不用
-	root.Flags().BoolVar(&cfg.Log.Caller, "log_caller", false, "log annotate each message with the filename, line number and function name")
-	root.Flags().StringVar(&cfg.Log.Level, "log_level", "INFO", "log message level: DEBUG, INFO, WARN, ERROR")
-	root.Flags().StringVar(&cfg.Log.Format, "log_format", "TEXT", "log message encode format: TEXT, JSON")
-
-	// http server 在console模式下不用
-	root.Flags().UintVar(&cfg.HttpServer.Port, "web_port", 8080, "http server listen port")
+	// web server 在console模式下不用
+	root.Flags().UintVar(&cfg.Web.Port, "web_port", 8080, "web server listen port")
+	// web log 在console模式下不用
+	root.Flags().StringVar(&cfg.Log.Level, "log_level", "info", "log message level: debug, info, warn, error")
+	root.Flags().StringVar(&cfg.Log.Format, "log_format", "text", "log message encode format: text, json")
 }
 
 func rootRun(cmd *cobra.Command, args []string) {
 	var start = time.Now()
+
+	switch strings.ToLower(flagRunningMode) {
+	case consoleMode, webMode:
+	default:
+		fmt.Println(fmt.Sprintf("invalid running mode: %q, use the default: %q", flagRunningMode, consoleMode))
+		flagRunningMode = consoleMode
+	}
 
 	logger := slog.Default()
 	if err := config.Setup(cfg); err != nil {
@@ -114,7 +125,6 @@ func rootRun(cmd *cobra.Command, args []string) {
 		logger.Error("config setup failed",
 			"error", err,
 		)
-		// fmt.Println(err)
 		return
 	}
 
@@ -122,7 +132,7 @@ func rootRun(cmd *cobra.Command, args []string) {
 		cfg.Print()
 	}
 
-	if flagConsole {
+	if strings.ToLower(flagRunningMode) == consoleMode {
 		cli, err := chatgpt.NewOpenAIClient(cfg.OpenAI.ApiKey, cfg.OpenAI.ApiType, cfg.OpenAI.ApiBaseUrl, cfg.OpenAI.Proxy)
 		if err != nil {
 			fmt.Println(err)
@@ -155,7 +165,7 @@ func rootRun(cmd *cobra.Command, args []string) {
 		sse.SetDefault(sseServer)
 		defer sseServer.Close()
 
-		httpd, err := config.HttpListenAndServe(router.New(), cfg.HttpServer, wg, logger)
+		httpd, err := config.WebListenAndServe(router.New(), cfg.Web, wg, logger)
 		if err != nil {
 			return
 		}
@@ -169,7 +179,7 @@ func rootRun(cmd *cobra.Command, args []string) {
 			"signal", s,
 		)
 
-		config.HttpShutdown(httpd, logger)
+		config.WebShutdown(httpd, logger)
 
 		wg.Wait()
 	}
