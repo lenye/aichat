@@ -89,6 +89,7 @@ dockers:
     goarch: amd64
     goamd64: v2
     build_flag_templates:
+      - "--pull"
       - "--platform=linux/amd64"
       - "--label=org.opencontainers.image.created={{.Date}}"
       - "--label=org.opencontainers.image.title={{.ProjectName}}"
@@ -106,6 +107,7 @@ dockers:
     goarch: arm64
     dockerfile: Dockerfile
     build_flag_templates:
+      - "--pull"
       - "--platform=linux/arm64"
       - "--label=org.opencontainers.image.created={{.Date}}"
       - "--label=org.opencontainers.image.title={{.ProjectName}}"
@@ -124,6 +126,7 @@ dockers:
     goarm: 6
     dockerfile: Dockerfile
     build_flag_templates:
+      - "--pull"
       - "--platform=linux/arm/v6"
       - "--label=org.opencontainers.image.created={{.Date}}"
       - "--label=org.opencontainers.image.title={{.ProjectName}}"
@@ -142,6 +145,7 @@ dockers:
     goarm: 7
     dockerfile: Dockerfile
     build_flag_templates:
+      - "--pull"
       - "--platform=linux/arm/v7"
       - "--label=org.opencontainers.image.created={{.Date}}"
       - "--label=org.opencontainers.image.title={{.ProjectName}}"

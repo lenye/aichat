@@ -17,16 +17,12 @@ jobs:
     name: GoReleaser build
 
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ${{ github.workspace }}/go/src/github.com/lenye/aichat
 
     steps:
       - name: Check out code
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          path: go/src/github.com/lenye/aichat
 
       - name: Set up Go ${{ env.GO_VERSION }}
         uses: actions/setup-go@v4
@@ -44,18 +40,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GO_RELEASER_GITHUB_TOKEN }}
 
-      - name: Docker Pull Base Image
-        run: |
-          docker pull --platform amd64 gcr.io/distroless/static-debian11
-          docker pull --platform arm64 gcr.io/distroless/static-debian11
-          docker pull --platform arm gcr.io/distroless/static-debian11
-
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v4
         with:
           version: latest
           args: release --clean
-          workdir: go/src/github.com/lenye/aichat
         env:
           GITHUB_TOKEN: ${{ secrets.GO_RELEASER_GITHUB_TOKEN }}
 
