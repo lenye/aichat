@@ -22,7 +22,6 @@ import (
 	"strings"
 	"sync"
 	"syscall"
-	"time"
 
 	"github.com/sashabaranov/go-openai"
 	"github.com/spf13/cobra"
@@ -98,6 +97,7 @@ func init() {
 	root.Flags().StringVar(&cfg.OpenAI.Proxy, "openai_proxy", "", "openai proxy")
 	root.Flags().StringVar(&cfg.OpenAI.Model, "openai_model", openai.GPT3Dot5Turbo, "openai chat message model")
 	root.Flags().StringVar(&cfg.OpenAI.System, "openai_system", "", "openai chat message system prompt")
+	root.Flags().BoolVar(&cfg.OpenAI.SystemRaw, "openai_system_raw", false, "openai chat message system prompt without any escape processing")
 	root.Flags().BoolVar(&cfg.OpenAI.Stream, "openai_stream", true, "openai chat message stream mode")
 	root.Flags().UintVar(&cfg.OpenAI.MaxTokens, "openai_max_tokens", 0, "openai chat message max tokens")
 	root.Flags().UintVar(&cfg.OpenAI.History, "openai_history", 0, "openai chat message history")
@@ -110,8 +110,6 @@ func init() {
 }
 
 func rootRun(cmd *cobra.Command, args []string) {
-	var start = time.Now()
-
 	switch strings.ToLower(flagRunningMode) {
 	case consoleMode, webMode:
 	default:
@@ -130,6 +128,15 @@ func rootRun(cmd *cobra.Command, args []string) {
 
 	if project.DevMode() {
 		cfg.Print()
+	}
+
+	if !cfg.OpenAI.SystemRaw {
+		var err error
+		cfg.OpenAI.System, err = project.StrRaw2Interpreted(cfg.OpenAI.System)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 	}
 
 	if strings.ToLower(flagRunningMode) == consoleMode {
@@ -183,8 +190,4 @@ func rootRun(cmd *cobra.Command, args []string) {
 
 		wg.Wait()
 	}
-
-	logger.Info(version.AppName+" exit",
-		"uptime", time.Since(start),
-	)
 }

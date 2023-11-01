@@ -105,15 +105,16 @@ type WebServerConfig struct {
 
 // OpenAIConfig chatGPT配置
 type OpenAIConfig struct {
-	ApiType    string `json:"api_type,omitempty"`
-	ApiKey     string `json:"api_key"`
-	ApiBaseUrl string `json:"api_base_url,omitempty"`
-	Proxy      string `json:"proxy,omitempty"`
-	Model      string `json:"model"`
-	System     string `json:"system,omitempty"`
-	Stream     bool   `json:"stream"`
-	MaxTokens  uint   `json:"max_tokens"`
-	History    uint   `json:"history"`
+	ApiType    string `json:"api_type,omitempty"`     // api类型
+	ApiKey     string `json:"api_key"`                // api key
+	ApiBaseUrl string `json:"api_base_url,omitempty"` // base url
+	Proxy      string `json:"proxy,omitempty"`        // 代理
+	Model      string `json:"model"`                  // 运行模式
+	System     string `json:"system,omitempty"`       // 系统提示信息
+	SystemRaw  bool   `json:"system_raw,omitempty"`   // 系统提示信息不支持“\”转义
+	Stream     bool   `json:"stream"`                 // 流模式
+	MaxTokens  uint   `json:"max_tokens"`             // 最大tokens
+	History    uint   `json:"history"`                // 历史记录
 }
 
 func setupLog(v *LogConfig) {

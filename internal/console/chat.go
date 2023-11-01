@@ -28,6 +28,8 @@ import (
 	"github.com/lenye/aichat/internal/chatgpt"
 )
 
+const promptInput = "(Press 'q' to quit) > "
+
 func Chat(client *openai.Client, in *chatgpt.Message) {
 	ctx := context.Background()
 	var hisMsg []openai.ChatCompletionMessage // 聊天记录
@@ -36,13 +38,16 @@ func Chat(client *openai.Client, in *chatgpt.Message) {
 	if in.System != "" {
 		fmt.Println(in.System)
 	}
-	fmt.Print("> ")
+	fmt.Print(promptInput)
 
 	// 用户输入
 	s := bufio.NewScanner(os.Stdin)
 	for s.Scan() {
 		input := strings.TrimSpace(s.Text())
 		if input != "" {
+			if input == "q" {
+				return
+			}
 			in.Prompt = input
 			req := chatgpt.MakeChatRequest(in, hisMsg)
 			if msg, err := chatCompletion(ctx, client, req); err == nil {
@@ -51,7 +56,7 @@ func Chat(client *openai.Client, in *chatgpt.Message) {
 				hisMsg = append(hisMsg, *msg)
 			}
 		}
-		fmt.Print("> ")
+		fmt.Print(promptInput)
 	}
 }
 
