@@ -28,23 +28,22 @@ builds:
       - windows
       - darwin
       - freebsd
+      - openbsd
     goarch:
       - amd64
       - arm64
       - 386
       - arm
-    goamd64:
-      - v2
+      - riscv64
     goarm:
       - 7
       - 6
     ignore:
       - goos: windows
         goarch: arm
-      - goos: darwin
-        goarch: 386
-      - goos: darwin
+      - goos: openbsd
         goarch: arm
+        goarm: 6
     mod_timestamp: '{{ .CommitTimestamp }}'
 
 
@@ -87,7 +86,6 @@ dockers:
     use: buildx
     goos: linux
     goarch: amd64
-    goamd64: v2
     build_flag_templates:
       - "--pull"
       - "--platform=linux/amd64"
