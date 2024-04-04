@@ -4,7 +4,7 @@ go 1.22.0
 
 require (
 	github.com/google/uuid v1.6.0
-	github.com/sashabaranov/go-openai v1.20.2
+	github.com/sashabaranov/go-openai v1.20.4
 	github.com/spf13/cobra v1.8.0
 )
 
