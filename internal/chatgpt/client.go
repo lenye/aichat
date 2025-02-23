@@ -63,15 +63,15 @@ func NewOpenAIClient(apiKey, apiType, baseURL, proxy string) (*openai.Client, er
 		return nil, fmt.Errorf("invalid api type: %q", apiType)
 	}
 
-	cfg.HTTPClient = defaultHTTPClient
-
 	if proxy != "" {
 		proxyUrl, err := url.Parse(proxy)
 		if err != nil {
 			return nil, fmt.Errorf("invalid proxy: %q, cause %s", proxy, err)
 		}
-		cfg.HTTPClient.Transport.(*http.Transport).Proxy = http.ProxyURL(proxyUrl)
+		defaultHTTPClient.Transport.(*http.Transport).Proxy = http.ProxyURL(proxyUrl)
 	}
+
+	cfg.HTTPClient = defaultHTTPClient
 
 	return openai.NewClientWithConfig(cfg), nil
 }
